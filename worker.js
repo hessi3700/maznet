@@ -1,5 +1,5 @@
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
     // Handle CORS preflight requests
     if (request.method === 'OPTIONS') {
       return new Response(null, {
@@ -13,12 +13,18 @@ export default {
 
     // Only allow GET requests
     if (request.method !== 'GET') {
-      return new Response('Method not allowed', { status: 405 });
+      return new Response('Method not allowed', { 
+        status: 405,
+        headers: {
+          'Content-Type': 'text/plain',
+          'Access-Control-Allow-Origin': '*',
+        }
+      });
     }
 
     try {
       // Get the latest config from KV
-      const configsStr = await env.CONFIGS.get('latest_configs');
+      const configsStr = await env.MAZNET_CONFIGS.get('latest_configs');
       
       if (!configsStr) {
         return new Response('No configurations available', { 
@@ -45,7 +51,7 @@ export default {
       }
 
       // Get the latest config
-      const latestConfig = configs[configs.length - 1];
+      const latestConfig = configs[0];  // First config is the latest due to sorting
 
       // Return just the raw config string
       return new Response(latestConfig.config, {
@@ -64,5 +70,5 @@ export default {
         }
       });
     }
-  },
+  }
 }; 

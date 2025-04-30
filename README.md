@@ -19,13 +19,40 @@ The following environment variables must be set in Railway:
    - Sign up at [Cloudflare](https://www.cloudflare.com/)
    - Add your domain to Cloudflare
 
-2. **Create a KV Namespace**:
-   - Go to Workers & Pages → KV
-   - Click "Create a namespace"
-   - Name it "maznet-configs"
-   - Copy the namespace ID (you'll need this for `CF_KV_NAMESPACE_ID`)
+2. **Install Wrangler**:
+```bash
+npm install -g wrangler
+```
 
-3. **Create a Cloudflare API Token**:
+3. **Login to Wrangler**:
+```bash
+wrangler login
+```
+
+4. **Deploy the Worker**:
+```bash
+wrangler deploy
+```
+
+The `wrangler.toml` and `worker.js` files are already configured in this repository. The deployment will:
+- Create a KV namespace
+- Create a Worker
+- Bind the KV namespace to the Worker
+- Deploy the code
+
+5. **Get Your Account ID**:
+   - Go to Workers & Pages
+   - Your Account ID is shown in the URL or in the right sidebar
+   - Copy this ID (you'll need this for `CF_ACCOUNT_ID`)
+
+6. **Get Your KV Namespace ID**:
+   - After deployment, run:
+   ```bash
+   wrangler kv:namespace list
+   ```
+   - Copy the ID of the "maznet-configs" namespace (you'll need this for `CF_KV_NAMESPACE_ID`)
+
+7. **Create a Cloudflare API Token**:
    - Go to My Profile → API Tokens
    - Click "Create Token"
    - Select "Create Custom Token"
@@ -34,42 +61,6 @@ The following environment variables must be set in Railway:
      - Account: Workers Scripts: Edit
    - Set the token name to "maznet-configs"
    - Copy the token (you'll need this for `CF_API_TOKEN`)
-
-4. **Create a Cloudflare Worker**:
-   - Go to Workers & Pages → Create application
-   - Choose "Create Worker"
-   - Name it "maznet-configs"
-   - Copy the following code into the worker:
-
-```javascript
-export default {
-  async fetch(request, env) {
-    const config = await env.MAZNET_CONFIGS.get('latest_configs');
-    if (!config) {
-      return new Response('No configurations available', { status: 404 });
-    }
-    
-    return new Response(config, {
-      headers: {
-        'content-type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
-  }
-};
-```
-
-5. **Bind KV to Worker**:
-   - In your worker settings, go to "Settings" → "Variables"
-   - Under "KV Namespace Bindings", click "Add binding"
-   - Set the variable name to "MAZNET_CONFIGS"
-   - Select your KV namespace
-   - Click "Save"
-
-6. **Get Your Account ID**:
-   - Go to Workers & Pages
-   - Your Account ID is shown in the URL or in the right sidebar
-   - Copy this ID (you'll need this for `CF_ACCOUNT_ID`)
 
 ## Local Setup
 
