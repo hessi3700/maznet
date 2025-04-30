@@ -44,17 +44,12 @@ class TelegramChannelScraper:
     def __init__(self, api_id, api_hash):
         self.client = TelegramClient('channel_scraper_session', api_id, api_hash)
         self.messages = []
-        self.configs = []
-        self.load_existing_configs()
+        self.configs = []  # We'll only keep the latest config
         self.session = None
 
     def load_existing_configs(self):
-        try:
-            if os.path.exists(CONFIGS_FILE):
-                with open(CONFIGS_FILE, 'r', encoding='utf-8') as f:
-                    self.configs = json.load(f)
-        except Exception as e:
-            print(f"Error loading existing configs: {e}")
+        # Don't load existing configs, we want to start fresh
+        self.configs = []
 
     async def initialize_kv(self):
         """Initialize KV storage with the latest config from channel"""
@@ -89,8 +84,8 @@ class TelegramChannelScraper:
             # Sort configs by date (newest first)
             all_configs.sort(key=lambda x: x['date'], reverse=True)
             
-            # Update self.configs
-            self.configs = all_configs
+            # Only keep the latest config
+            self.configs = all_configs[:1] if all_configs else []
             
             # Save to KV
             data = {
@@ -99,7 +94,7 @@ class TelegramChannelScraper:
             
             async with self.session.put(url, headers=headers, json=data) as response:
                 if response.status == 200:
-                    print(f"Successfully initialized KV with {len(self.configs)} configs")
+                    print(f"Successfully initialized KV with latest config")
                     if self.configs:
                         print(f"Latest config: {self.configs[0]['config']}")
                 else:
@@ -176,16 +171,14 @@ class TelegramChannelScraper:
                 vless_configs = self.extract_vless_config(message.text)
                 
                 if vless_configs:
-                    for config in vless_configs:
-                        if config not in [c['config'] for c in self.configs]:
-                            config_data = {
-                                'config': config,
-                                'date': message.date.isoformat(),
-                                'message_id': message.id
-                            }
-                            self.configs.append(config_data)
-                            print(f"New VLESS config found: {config}")
-                            self.save_configs()
+                    # Only keep the latest config
+                    self.configs = [{
+                        'config': vless_configs[0],  # Take the first config from the message
+                        'date': message.date.isoformat(),
+                        'message_id': message.id
+                    }]
+                    print(f"New VLESS config found: {vless_configs[0]}")
+                    self.save_configs()
                 
                 # Save the full message
                 message_data = {
