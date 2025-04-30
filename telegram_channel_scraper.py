@@ -13,11 +13,11 @@ load_dotenv()
 
 # Your Telegram API credentials
 # Get these from https://my.telegram.org
-API_ID = os.getenv('TELEGRAM_API_ID', '25278657')
-API_HASH = os.getenv('TELEGRAM_API_HASH', 'b2cd279ea5e3af5e52259cae2b235203')
+API_ID = os.getenv('TELEGRAM_API_ID')
+API_HASH = os.getenv('TELEGRAM_API_HASH')
 
 # Channel username or ID to monitor
-CHANNEL_USERNAME = 'paznethessi'
+CHANNEL_USERNAME = 'Maznet'
 
 # Files to save messages
 OUTPUT_FILE = 'channel_messages.json'
@@ -29,9 +29,9 @@ CONFIGS_FILE = 'vless_configs.json'
 # 2. Create new token with permissions:
 #    - Account.Cloudflare Workers: Edit
 #    - Account.Workers KV Storage: Edit
-CF_API_TOKEN = os.getenv('CF_API_TOKEN', '6zC35mAii0u-3En4XDRiW05xY_U5rCkPKAWYh3wA')
-CF_ACCOUNT_ID = os.getenv('CF_ACCOUNT_ID', 'e99d5d1bf75bae35d880e497f81fe1c7')
-CF_KV_NAMESPACE_ID = os.getenv('CF_KV_NAMESPACE_ID', '9005b23701294974af29a4f659ffae1a')
+CF_API_TOKEN = os.getenv('CF_API_TOKEN')
+CF_ACCOUNT_ID = os.getenv('CF_ACCOUNT_ID')
+CF_KV_NAMESPACE_ID = os.getenv('CF_KV_NAMESPACE_ID')
 
 class TelegramChannelScraper:
     def __init__(self, api_id, api_hash):
@@ -76,12 +76,51 @@ class TelegramChannelScraper:
             import traceback
             print(traceback.format_exc())
 
+    async def initialize_with_latest_config(self):
+        """Fetch the latest config from the channel and set it in KV"""
+        try:
+            # Get the channel entity
+            channel = await self.client.get_entity(CHANNEL_USERNAME)
+            
+            # Get the last 20 messages (to ensure we find a config)
+            messages = await self.client.get_messages(channel, limit=20)
+            
+            # Find the latest config
+            latest_config = None
+            for message in messages:
+                if message.text:
+                    configs = self.extract_vless_config(message.text)
+                    if configs:
+                        latest_config = {
+                            'config': configs[0],
+                            'date': message.date.isoformat(),
+                            'message_id': message.id
+                        }
+                        break
+            
+            if latest_config:
+                print(f"Found latest config from message {latest_config['message_id']}")
+                # Reset configs array with just the latest config
+                self.configs = [latest_config]
+                # Save to local file
+                with open(CONFIGS_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(self.configs, f, ensure_ascii=False, indent=4)
+                # Sync to Cloudflare
+                await self.sync_with_cloudflare()
+            else:
+                print("No config found in recent messages")
+                
+        except Exception as e:
+            print(f"Error initializing with latest config: {e}")
+            import traceback
+            print(traceback.format_exc())
+
     async def connect(self):
         await self.client.start()
         self.session = aiohttp.ClientSession()
         print("Connected to Telegram!")
-        # Initialize KV storage
-        await self.initialize_kv()
+        # Initialize with latest config
+        await self.initialize_with_latest_config()
 
     def extract_vless_config(self, text):
         # Pattern to match VLESS configurations, including those in code blocks
