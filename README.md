@@ -8,7 +8,7 @@ The following environment variables must be set in Railway:
 
 - `TELEGRAM_API_ID`: Your Telegram API ID
 - `TELEGRAM_API_HASH`: Your Telegram API Hash
-- `CHANNEL_USERNAME`: The Telegram channel username to monitor (defaults to 'paznethessi')
+- `CHANNEL_USERNAME`: The Telegram channel username to monitor (defaults to 'Maznet')
 - `CF_API_TOKEN`: Your Cloudflare API token
 - `CF_ACCOUNT_ID`: Your Cloudflare account ID
 - `CF_KV_NAMESPACE_ID`: Your Cloudflare KV namespace ID
