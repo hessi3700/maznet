@@ -51,7 +51,7 @@ python3 telegram_channel_scraper.py
 
 The latest VLESS config is always available at:
 ```
-https://maznet-configs.hessi3700.workers.dev/
+https://maznet-configs.<YOUR-CLOUDFLARE-USERNAME>.workers.dev/
 ```
 
 ## Features
