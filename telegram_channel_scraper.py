@@ -12,26 +12,33 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Your Telegram API credentials
-# Get these from https://my.telegram.org
 API_ID = os.getenv('TELEGRAM_API_ID')
 API_HASH = os.getenv('TELEGRAM_API_HASH')
 
 # Channel username or ID to monitor
-CHANNEL_USERNAME = 'Maznet'
+CHANNEL_USERNAME = os.getenv('CHANNEL_USERNAME', 'Maznet')
 
 # Files to save messages
 OUTPUT_FILE = 'channel_messages.json'
 CONFIGS_FILE = 'vless_configs.json'
 
 # Cloudflare Worker configuration
-# Get these from Cloudflare Dashboard:
-# 1. Go to My Profile → API Tokens
-# 2. Create new token with permissions:
-#    - Account.Cloudflare Workers: Edit
-#    - Account.Workers KV Storage: Edit
 CF_API_TOKEN = os.getenv('CF_API_TOKEN')
 CF_ACCOUNT_ID = os.getenv('CF_ACCOUNT_ID')
 CF_KV_NAMESPACE_ID = os.getenv('CF_KV_NAMESPACE_ID')
+
+# Validate required environment variables
+required_vars = {
+    'TELEGRAM_API_ID': API_ID,
+    'TELEGRAM_API_HASH': API_HASH,
+    'CF_API_TOKEN': CF_API_TOKEN,
+    'CF_ACCOUNT_ID': CF_ACCOUNT_ID,
+    'CF_KV_NAMESPACE_ID': CF_KV_NAMESPACE_ID
+}
+
+missing_vars = [var for var, value in required_vars.items() if not value]
+if missing_vars:
+    raise ValueError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 class TelegramChannelScraper:
     def __init__(self, api_id, api_hash):
@@ -50,7 +57,7 @@ class TelegramChannelScraper:
             print(f"Error loading existing configs: {e}")
 
     async def initialize_kv(self):
-        """Initialize KV storage with test data if empty"""
+        """Initialize KV storage with the latest config from channel"""
         try:
             url = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/storage/kv/namespaces/{CF_KV_NAMESPACE_ID}/values/latest_configs"
             headers = {
@@ -58,60 +65,48 @@ class TelegramChannelScraper:
                 "Content-Type": "application/json"
             }
             
-            # First check if there's any data
-            async with self.session.get(url, headers=headers) as response:
-                if response.status == 404:
-                    # Initialize with empty array if no data exists
-                    data = {
-                        "value": "[]"
-                    }
-                    async with self.session.put(url, headers=headers, json=data) as put_response:
-                        if put_response.status == 200:
-                            print("Successfully initialized KV storage")
-                        else:
-                            print(f"Failed to initialize KV storage: {put_response.status}")
-                            print(await put_response.text())
-        except Exception as e:
-            print(f"Error initializing KV storage: {e}")
-            import traceback
-            print(traceback.format_exc())
-
-    async def initialize_with_latest_config(self):
-        """Fetch the latest config from the channel and set it in KV"""
-        try:
             # Get the channel entity
             channel = await self.client.get_entity(CHANNEL_USERNAME)
             
-            # Get the last 20 messages (to ensure we find a config)
-            messages = await self.client.get_messages(channel, limit=20)
+            # Get the last 100 messages
+            messages = await self.client.get_messages(channel, limit=100)
             
-            # Find the latest config
-            latest_config = None
+            # Extract all VLESS configs from messages
+            all_configs = []
             for message in messages:
                 if message.text:
-                    configs = self.extract_vless_config(message.text)
-                    if configs:
-                        latest_config = {
-                            'config': configs[0],
-                            'date': message.date.isoformat(),
-                            'message_id': message.id
-                        }
-                        break
+                    vless_configs = self.extract_vless_config(message.text)
+                    if vless_configs:
+                        for config in vless_configs:
+                            if config not in [c['config'] for c in all_configs]:
+                                config_data = {
+                                    'config': config,
+                                    'date': message.date.isoformat(),
+                                    'message_id': message.id
+                                }
+                                all_configs.append(config_data)
             
-            if latest_config:
-                print(f"Found latest config from message {latest_config['message_id']}")
-                # Reset configs array with just the latest config
-                self.configs = [latest_config]
-                # Save to local file
-                with open(CONFIGS_FILE, 'w', encoding='utf-8') as f:
-                    json.dump(self.configs, f, ensure_ascii=False, indent=4)
-                # Sync to Cloudflare
-                await self.sync_with_cloudflare()
-            else:
-                print("No config found in recent messages")
-                
+            # Sort configs by date (newest first)
+            all_configs.sort(key=lambda x: x['date'], reverse=True)
+            
+            # Update self.configs
+            self.configs = all_configs
+            
+            # Save to KV
+            data = {
+                "value": json.dumps(self.configs)
+            }
+            
+            async with self.session.put(url, headers=headers, json=data) as response:
+                if response.status == 200:
+                    print(f"Successfully initialized KV with {len(self.configs)} configs")
+                    if self.configs:
+                        print(f"Latest config: {self.configs[0]['config']}")
+                else:
+                    print(f"Failed to initialize KV: {response.status}")
+                    print(await response.text())
         except Exception as e:
-            print(f"Error initializing with latest config: {e}")
+            print(f"Error initializing KV: {e}")
             import traceback
             print(traceback.format_exc())
 
@@ -119,8 +114,8 @@ class TelegramChannelScraper:
         await self.client.start()
         self.session = aiohttp.ClientSession()
         print("Connected to Telegram!")
-        # Initialize with latest config
-        await self.initialize_with_latest_config()
+        # Initialize KV storage with latest configs
+        await self.initialize_kv()
 
     def extract_vless_config(self, text):
         # Pattern to match VLESS configurations, including those in code blocks
