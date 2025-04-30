@@ -1,0 +1,11 @@
+name = "maznet-configs"
+main = "worker.js"
+compatibility_date = "2024-03-20"
+
+[[kv_namespaces]]
+binding = "CONFIGS"
+id = "CF_KV_NAMESPACE_ID"
+# To get a preview_id, run:
+# wrangler kv:namespace create "CONFIGS_PREVIEW"
+# Then copy the preview_id from the output and replace the line below
+preview_id = "CF_KV_NAMESPACE_ID" 
