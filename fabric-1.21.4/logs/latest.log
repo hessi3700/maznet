@@ -1,0 +1,61 @@
+[20:54:00] [main/INFO]: Loading Minecraft 1.21.4 with Fabric Loader 0.16.14
+[20:54:00] [main/INFO]: Loading 4 mods:
+	- fabricloader 0.16.14
+	   \-- mixinextras 0.4.1
+	- java 21
+	- minecraft 1.21.4
+[20:54:00] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/workspaces/maznet/fabric-1.21.4/libraries/net/fabricmc/sponge-mixin/0.15.5+mixin.0.8.7/sponge-mixin-0.15.5+mixin.0.8.7.jar Service=Knot/Fabric Env=SERVER
+[20:54:05] [main/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[20:54:07] [main/INFO]: Loaded 1370 recipes
+[20:54:07] [main/INFO]: Loaded 1481 advancements
+[20:54:07] [Server thread/INFO]: Starting minecraft server version 1.21.4
+[20:54:07] [Server thread/INFO]: Loading properties
+[20:54:07] [Server thread/INFO]: Default game type: SURVIVAL
+[20:54:07] [Server thread/INFO]: Generating keypair
+[20:54:07] [Server thread/INFO]: Starting Minecraft server on *:25565
+[20:54:07] [Server thread/INFO]: Using epoll channel type
+[20:54:08] [Server thread/WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[20:54:08] [Server thread/WARN]: The server will make no attempt to authenticate usernames. Beware.
+[20:54:08] [Server thread/WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[20:54:08] [Server thread/WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+[20:54:08] [Server thread/INFO]: Preparing level "world"
+[20:54:08] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
+[20:54:11] [Worker-Main-3/INFO]: Preparing spawn area: 0%
+[20:54:11] [Worker-Main-3/INFO]: Preparing spawn area: 0%
+[20:54:11] [Worker-Main-3/INFO]: Preparing spawn area: 0%
+[20:54:11] [Worker-Main-3/INFO]: Preparing spawn area: 0%
+[20:54:11] [Worker-Main-3/INFO]: Preparing spawn area: 0%
+[20:54:11] [Worker-Main-3/INFO]: Preparing spawn area: 0%
+[20:54:11] [Server thread/INFO]: Time elapsed: 3038 ms
+[20:54:11] [Server thread/INFO]: Done (3.311s)! For help, type "help"
+[20:54:44] [Server thread/INFO]: HESSl[/[0:0:0:0:0:0:0:1]:33464] logged in with entity id 10 at (-283.5, 71.0, -65.5)
+[20:54:44] [Server thread/INFO]: HESSl joined the game
+[20:56:25] [Server thread/INFO]: pepeking20[/[0:0:0:0:0:0:0:1]:53604] logged in with entity id 1082 at (-291.5, 63.0, -67.5)
+[20:56:25] [Server thread/INFO]: pepeking20 joined the game
+[20:57:36] [Server thread/INFO]: pepeking20 lost connection: Disconnected
+[20:57:36] [Server thread/INFO]: pepeking20 left the game
+[20:57:43] [Server thread/INFO]: HESSl lost connection: Disconnected
+[20:57:43] [Server thread/INFO]: HESSl left the game
+[20:57:48] [Server thread/INFO]: HESSl[/[0:0:0:0:0:0:0:1]:56254] logged in with entity id 1729 at (-293.2799054220908, 64.0, -88.97794026342184)
+[20:57:48] [Server thread/INFO]: HESSl joined the game
+[21:00:32] [Server thread/INFO]: HESSl lost connection: Disconnected
+[21:00:32] [Server thread/INFO]: HESSl left the game
+[21:00:57] [Server thread/INFO]: HESSl[/127.188.28.69:55167] logged in with entity id 2661 at (-296.11991574782155, 64.0, -121.49408454252627)
+[21:00:57] [Server thread/INFO]: HESSl joined the game
+[21:01:03] [Server thread/INFO]: pepeking20[/127.175.73.121:38409] logged in with entity id 3310 at (-295.9840986767079, 64.0, -83.6330120000381)
+[21:01:03] [Server thread/INFO]: pepeking20 joined the game
+[21:03:33] [Server thread/INFO]: HESSl lost connection: Disconnected
+[21:03:33] [Server thread/INFO]: HESSl left the game
+[21:03:33] [Server thread/INFO]: pepeking20 lost connection: Disconnected
+[21:03:33] [Server thread/INFO]: pepeking20 left the game
+[21:03:39] [Server thread/INFO]: Stopping the server
+[21:03:39] [Server thread/INFO]: Stopping server
+[21:03:39] [Server thread/INFO]: Saving players
+[21:03:39] [Server thread/INFO]: Saving worlds
+[21:03:39] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[21:03:39] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[21:03:39] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[21:03:39] [Server thread/INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[21:03:39] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[21:03:39] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[21:03:39] [Server thread/INFO]: ThreadedAnvilChunkStorage: All dimensions are saved
